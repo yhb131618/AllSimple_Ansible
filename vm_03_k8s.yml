@@ -1,0 +1,32 @@
+---
+- name: centos 7 Setting
+  hosts: k8s
+  become: yes
+  tasks:
+
+    - name: Selinux stop
+      command: setenforce 0
+
+
+    - name: K8s repository
+      command: >
+        bash -c `cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+        EOF`
+
+    - name: yum install k8s pack
+      command:  sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+    - name: enalbe kubelet
+      command: systemctl enable --now kubelet
+
+    - name: swapoff
+      command: swapoff -a
+

@@ -1,0 +1,67 @@
+- name: kvm create
+  hosts: BEE
+  become: yes
+  vars:
+    clone_name:
+      - 'Jenkins'
+      - 'Harbor'
+      - 'Kafka'
+      - 'Logstash'
+      - 'Elasticsearch'
+      - 'Kibana'
+    vms:
+      - clone_name: 'Jenkins'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:31'
+      - clone_name: 'Harbor'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:32'
+      - clone_name: 'Kafka'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:33'
+      - clone_name: 'Logstash'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:34'
+      - clone_name: 'Elasticsearch'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:35'
+      - clone_name: 'Kibana'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:36'
+
+
+            
+
+  tasks:
+    - name: create xml
+      command: cp /img/test.xml /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: xml to convert for multiple VMs
+      include_tasks: vm_XML.yml
+      loop: "{{ vms }}"
+      loop_control:
+        loop_var: vm
+
+    - name: clone image qcow2
+      command: cp /img/test.qcow2 /var/lib/libvirt/images/{{ item }}.qcow2
+      loop: "{{ clone_name }}"
+
+    - name: vm define
+      command: virsh define /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: vm start 
+      command: virsh start {{ item }}
+      loop: "{{ clone_name }}"
+
+    - name: vm autostart
+      command: virsh autostart {{ item }}
+      loop: "{{ clone_name }}"
+

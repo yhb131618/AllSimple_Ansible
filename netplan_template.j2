@@ -1,0 +1,13 @@
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+  {{ interface_name }}:
+     dhcp4: no
+  bridges:
+     br0:
+       interfaces: [{{ interface_name }}]
+       dhcp4: yes
+       parameters:
+          stp: false
+          forward-delay: 0

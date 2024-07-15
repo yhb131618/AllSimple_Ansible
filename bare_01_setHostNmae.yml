@@ -1,0 +1,11 @@
+---
+- name: Set hostname on all hosts
+  hosts: bare_metal
+  become: yes
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ hostvars[inventory_hostname].alias }}"
+    - name: Apply hostname immediately (Linux)
+      command: hostnamectl set-hostname "{{ hostvars[inventory_hostname].alias }}"
+

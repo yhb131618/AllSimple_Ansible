@@ -1,0 +1,44 @@
+---
+- name: Deploy Spring Back-end from Harbor to Kubernetes
+  hosts: master
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+    - name: Log in to Harbor registry
+      command:
+        cmd: docker login -u {{ harbor_username }} -p {{ harbor_password }} {{ harbor_registry }}
+
+    - name: Pull Docker image from Harbor
+      command:
+        cmd: docker pull {{ harbor_registry }}/{{ harbor_project }}/{{ image_name }}:{{ image_tag }}
+
+    - name: Push Docker image to Kubernetes cluster
+      command:
+        cmd: docker push {{ harbor_registry }}/{{ harbor_project }}/{{ image_name }}:{{ image_tag }}
+
+    - name: Copy Kubernetes YAML file to master node
+      template:
+        src: spring-back.yaml
+        dest: /tmp/spring-back.yaml
+        setype: tmp_t
+    - name: Apply Kubernetes YAML
+      command:
+        cmd: kubectl apply -f /tmp/spring-back.yaml
+
+    - name: Verify Deployment
+      command:
+        cmd: kubectl get deployment spring-app -n default
+      register: deployment_info
+
+    - name: Verify Service
+      command:
+        cmd: kubectl get service backend-spring -n default
+      register: service_info
+
+    - name: Display Deployment Info
+      debug:
+        msg: "{{ deployment_info.stdout_lines }}"
+
+    - name: Display Service Info
+      debug:
+        msg: "{{ service_info.stdout_lines }}"

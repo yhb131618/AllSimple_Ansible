@@ -1,0 +1,54 @@
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+
+[bare_metal]
+localhost ansible_user=root alias=GMK
+192.168.77.13 ansible_user=root alias=BEE 
+192.168.77.14 ansible_user=root alias=LEM 
+192.168.77.15 ansible_user=root alias=MSI
+
+[BEE]
+192.168.77.13
+ 
+[LEN]
+192.168.77.14
+
+[MSI]
+192.168.77.15
+
+[nginx]
+192.168.77.21
+
+[minio]
+192.168.77.49
+[kvm]
+192.168.77.31 ansible_user=root alias=Jenkins
+192.168.77.32 ansible_user=root alias=Harbor
+192.168.77.33 ansible_user=root alias=Kafka
+192.168.77.34 ansible_user=root alias=Logstash
+192.168.77.35 ansible_user=root alias=Elastic
+192.168.77.36 ansible_user=root alias=Kibana
+192.168.77.41 ansible_user=root alias=k8sM1
+192.168.77.42 ansible_user=root alias=k8sW1
+192.168.77.43 ansible_user=root alias=mysql1
+192.168.77.44 ansible_user=root alias=resyslog
+192.168.77.46 ansible_user=root alias=k8sM2
+192.168.77.47 ansible_user=root alias=k8sW2
+192.168.77.48 ansible_user=root alias=mysql2
+192.168.77.49 ansible_user=root alias=minio
+
+[k8s]
+192.168.77.41
+192.168.77.42
+192.168.77.46
+192.168.77.47
+
+[master]
+192.168.77.39
+
+
+
+
+
+
+

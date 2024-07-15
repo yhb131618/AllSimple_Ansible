@@ -1,0 +1,122 @@
+---
+
+- name: ubuntu 20.04 kvm install
+  hosts: bare_metal
+  become: yes
+
+  tasks:
+    - name: kvm install
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - qemu-kvm
+        - libvirt-daemon-system
+        - libvirt-clients
+        - bridge-utils
+        - virtinst
+        - virt-manager
+
+    - name: Check if libvirtd is active
+      command: systemctl is-active libvirtd
+      register: libvirtd_status
+      ignore_errors: true
+
+    - name: Start libvirtd if not active
+      systemd:
+        name: libvirtd
+        state: started
+      when: libvirtd_status.rc != 0
+
+    - name: Get network interfaces information
+      command: ip addr
+      register: ip_addr_result
+
+    - name: Display ip_addr_result.stdout_lines for debugging
+      debug:
+        var: ip_addr_result.stdout_lines
+
+    - name : netplan_config rm
+      command: rm -rf /etc/netplan/01-network-manager-all.yaml 
+      ignore_errors: true
+
+    - name: netplan_config touch
+      command:  touch /etc/netplan/01-network-manager-all.yaml 
+      ignore_errors: true
+              
+    - name: Extract enx* interfaces
+      set_fact:
+          enx_interfaces: "{{ ip_addr_result.stdout | regex_search('enx[^ ]*') | map('regex_replace', ':$', '') | default([]) | list | join('') }}"
+
+    - name: Display enx_interfaces for debugging
+      debug:
+        var: enx_interfaces
+  
+ 
+    - name: Replace contents of /etc/netplan/01-network-manager-all.yaml for each guest
+      replace:
+        path: /etc/netplan/01-network-manager-all.yaml
+        regexp: '.*'
+        replace: "{{ lookup('template', 'netplan_template.j2') }}"
+      loop: "{{ [enx_interfaces]  }}"
+      loop_control:
+        loop_var: interface_name
+           
+    - name : bridge network
+      template:
+        src: br0.xml.j2
+        dest: /etc/netplan/br0.xml
+      become: yes
+
+      
+    - name : virsh network create1
+      command : virsh net-define /etc/netplan/br0.xml
+      register: net_result
+      ignore_errors: true
+
+    - name : virsh network create2
+      command : virsh net-start br0
+      when : net_result.rc == 0 
+
+    - name : virsh network create3
+      command : virsh net-autostart br0
+     
+    - name : virsh network create4
+      command : virsh net-list --all
+      register : virsh_result
+   
+    - name : systemctl restart network
+      command : sudo systemctl restart NetworkManager
+    
+    - name : systemctl restart systemd-networkd
+      command : sudo systemctl restart systemd-networkd
+
+    - name : netplan apply
+      command : netpaln apply
+
+    - name : virsh debug
+      debug :
+         var: virsh_result
+
+    - name : ftp install
+      command : apt install vsftpd
+     
+    - name : ftp status
+      command : systemctl status vsftpd
+      register : vsftpd
+      ignore_errors : true
+
+    - name: write_enable in vsftpd.conf
+      replace:
+        path: /etc/vsftpd.conf
+        regexp: '^#write_enable=YES'
+        replace: 'write_enable=YES'
+        state: present
+      when : vsftpd.rc != 0
+
+    - name : ftp start
+      command : systemctl restart vsftpd
+      
+    - name : virt tool install
+      command: apt install libguestfs-tools
+

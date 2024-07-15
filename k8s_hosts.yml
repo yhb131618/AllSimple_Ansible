@@ -1,0 +1,16 @@
+- name: Update /etc/hosts file
+  hosts: k8s
+  become: yes
+  tasks:
+    - name: Add master1 entry to /etc/hosts
+      shell: echo "192.168.77.41 master1" >> /etc/hosts
+
+    - name: Add master2 entry to /etc/hosts
+      shell: echo "192.168.77.46 master2" >> /etc/hosts
+
+    - name: Add worker1 entry to /etc/hosts
+      shell: echo "192.168.77.42 worker1" >> /etc/hosts
+
+    - name: Add worker2 entry to /etc/hosts
+      shell: echo "192.168.77.47 worker2" >> /etc/hosts
+

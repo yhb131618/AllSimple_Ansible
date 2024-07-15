@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-app
+  namespace: default
+  labels:
+    app: react-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: react-app
+  template:
+    metadata:
+      labels:
+        app: react-app
+    spec:
+      containers:
+        - name: react-app
+          image: "{{ harbor_registry }}/{{ harbor_project }}/{{ image_name }}:{{ image_tag }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react-service
+  namespace: default
+  labels:
+    app: react-app
+spec:
+  selector:
+    app: react-app
+  ports:
+    - port: 3000
+      targetPort: 80
+      nodePort: 30000
+      protocol: TCP
+  type: NodePort
+  

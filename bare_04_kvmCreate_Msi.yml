@@ -1,0 +1,56 @@
+- name: kvm create
+  hosts: MSI
+  become: yes
+  vars:
+    clone_name:
+      - 'k8s_M1'
+      - 'k8s_W1'
+      - 'Mysql1'
+      - 'Rsyslog'
+    vms:
+      - clone_name: 'k8s_M1'
+        cpu: 3
+        ram: 3145728
+        mac: '00:00:00:00:00:41'
+      - clone_name: 'k8s_W1'
+        cpu: 4
+        ram: 4145728
+        mac: '00:00:00:00:00:42'
+      - clone_name: 'Mysql1'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:43'
+      - clone_name: 'Rsyslog'
+        cpu: 2
+        ram: 2145728
+        mac: '00:00:00:00:00:44'
+
+            
+
+  tasks:
+    - name: create xml
+      command: cp /img/test.xml /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: xml to convert for multiple VMs
+      include_tasks: vm_XML.yml
+      loop: "{{ vms }}"
+      loop_control:
+        loop_var: vm
+
+    - name: clone image qcow2
+      command: cp /img/test.qcow2 /var/lib/libvirt/images/{{ item }}.qcow2
+      loop: "{{ clone_name }}"
+
+    - name: vm define
+      command: virsh define /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: vm start 
+      command: virsh start {{ item }}
+      loop: "{{ clone_name }}"
+
+    - name: vm autostart
+      command: virsh autostart {{ item }}
+      loop: "{{ clone_name }}"
+

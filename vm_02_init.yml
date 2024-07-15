@@ -1,0 +1,52 @@
+---
+
+- name: centos 7 Setting
+  hosts: kvm 
+  become: yes
+  tasks:
+
+    - name: yum update
+      command: yum -y update
+
+    - name: yum upgrade
+      command: yum -y upgrade
+
+    - name: yum install package
+      command: yum -y install yum-utils device-mapper-persistent-data lvm2
+
+    - name: Add Docker repository
+      yum_repository:
+        name: Docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+        enabled: 1
+        gpgcheck: 1
+        gpgkey: https://download.docker.com/linux/centos/gpg
+
+    - name: Install Docker CE
+      command: yum install -y docker-ce docker-ce-cli containerd.io
+
+    - name : Docker Compose Remove
+      command: rm -rf /usr/local/bin/docker-compose
+
+    - name : python3
+      command : yum install -y libselinux-python3
+
+    - name: Download Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64"
+        dest: /usr/local/bin/docker-compose
+        mode: 'u+x,g+x'
+
+    - name: Set Docker Compose executable
+      file:
+         path: /usr/local/bin/docker-compose
+         mode: 'u+x,g+x'
+
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+

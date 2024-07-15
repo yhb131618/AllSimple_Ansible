@@ -1,0 +1,17 @@
+---
+- name: Copy file VM
+  hosts: bare_metal
+  become: yes
+
+  tasks:
+    - name: Copy XML FIle
+      copy: 
+        src: /home/yhb/ansible/test.xml
+        dest: /img/test.xml
+
+  tasks:
+    - name: Copy QCOW FIle
+      copy:
+       src: /home/yhb/ansible/test.qcow2
+       dest: /img/test.qcow2
+

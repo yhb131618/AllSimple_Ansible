@@ -1,0 +1,8 @@
+---
+- name: Echo test message
+  hosts: master
+  tasks:
+    - name: Print test message
+      debug:
+        msg: "test"
+

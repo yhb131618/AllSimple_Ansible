@@ -1,0 +1,40 @@
+- name: kvm create
+  hosts: localhost
+  become: yes
+  vars:
+    clone_name:
+      - 'nginx'
+    vms:
+      - clone_name: 'nginx'
+        cpu: 1
+        ram: 2145728
+        mac: '00:00:00:00:00:21'
+            
+
+  tasks:
+    - name: create xml
+      command: cp /img/test.xml /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: xml to convert for multiple VMs
+      include_tasks: vm_XML.yml
+      loop: "{{ vms }}"
+      loop_control:
+        loop_var: vm
+
+    - name: clone image qcow2
+      command: cp /img/test.qcow2 /var/lib/libvirt/images/{{ item }}.qcow2
+      loop: "{{ clone_name }}"
+
+    - name: vm define
+      command: virsh define /img/{{ item }}.xml
+      loop: "{{ clone_name }}"
+
+    - name: vm start 
+      command: virsh start {{ item }}
+      loop: "{{ clone_name }}"
+
+    - name: vm autostart
+      command: virsh autostart {{ item }}
+      loop: "{{ clone_name }}"
+

@@ -1,0 +1,38 @@
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: '<name>test</name>'
+    replace: '<name>{{ vm.clone_name }}</name>'
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<memory unit='KiB'>3145728</memory>"
+    replace: "<memory unit='KiB'>{{ vm.ram }}</memory>"
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<currentMemory unit='KiB'>3145728</currentMemory>"
+    replace: "<currentMemory unit='KiB'>{{ vm.ram }}</currentMemory>"
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<vcpu placement='static'>2</vcpu>"
+    replace: "<vcpu placement='static'>{{ vm.cpu }}</vcpu>"
+
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<source file='/var/lib/libvirt/images/test.qcow2"
+    replace: "<source file='/var/lib/libvirt/images/{{ vm.clone_name }}.qcow2"
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<mac address='52:54:00:2d:09:d6'/>"
+    replace: "<mac address='{{ vm.mac }}'/>"
+
+- replace:
+    path: "/img/{{ vm.clone_name }}.xml"
+    regexp: "<uuid>ab679d83-a4ae-4c63-a711-e94db533aaae</uuid>"
+    replace: ""
+
+
+
